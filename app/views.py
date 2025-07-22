@@ -1,6 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Car, Category
 from .forms import *
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import  UserCreationForm
 
 def index_view(request):
     cars = Car.objects.all()
@@ -14,7 +17,9 @@ def add_car(request):
     form = carForm(request.POST, request.FILES)
     if request.method == 'POST':
         if form.is_valid():
-            form.save()
+            car = form.save(commit=False)
+            car.user = request.user
+            car.save()
             return redirect('index_view')
         else:
             form = carForm()
@@ -26,9 +31,6 @@ def delete_car(request, car_id):
         car.delete()
         return redirect('index_view')
     return render(request)
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Car, Category
 
 def edit_car(request, car_id):
     car = get_object_or_404(Car, id=car_id)
@@ -55,5 +57,42 @@ def edit_car(request, car_id):
         'car': car,
         'categories': categories
     })
+
+def user_register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Account created successfully')
+            login(request, user)  # Auto login after registration
+            return redirect('index_view')
+
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f"{error}")
+
+
+    form = UserCreationForm()
+    return render(request, 'app/user_register.html', {'form': form})
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index_view')
+        else:
+            messages.error(request, 'Invalid username or password')
+    return render(request, 'app/user_login.html')
+
+def user_logout(request):
+    logout(request)
+    messages.success(request,"You logged out successfully")
+    return redirect("index_view")
+
+
+
 
 

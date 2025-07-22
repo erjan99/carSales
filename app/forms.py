@@ -7,3 +7,4 @@ class carForm(forms.ModelForm):
         fields = ['name', 'model', 'year', 'price', 'category', 'description', 'image']
 
 
+

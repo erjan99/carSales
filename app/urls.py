@@ -7,4 +7,8 @@ urlpatterns = [
     path('add_car/', add_car, name = 'add_car'),
     path('delete_car/<int:car_id>/', delete_car, name = 'car_deletion'),
     path('edit_car/<int:car_id>/', edit_car, name = 'edit_car'),
+
+    path('user_register/', user_register, name='register'),
+    path('user_login/', user_login, name='login'),
+    path('user_logout/', user_logout, name='user_logout')
 ]
